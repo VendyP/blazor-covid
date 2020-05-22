@@ -1,0 +1,23 @@
+﻿@page "/"
+@inject IKawalCorona kc
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@if(vm != null)
+{
+    @vm.Name
+}
+
+@code{
+
+    private KawalCoronaIndonesiaVm vm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var results = await kc.GetKawalCoronaIndonesia();
+
+        vm = results.FirstOrDefault();
+    }
+}
