@@ -1,0 +1,144 @@
+﻿@inject ICovidApi covidApi
+@inject ILogger<Covid19Api> logger
+
+<div class="row">
+    <div class="col-sm-4">
+        @if (_summary != null)
+        {
+            <div class="card">
+                <h5 class="card-header">Total Confirmed (Global)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_summary.Global.TotalConfirmed</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+
+    <div class="col-sm-4">
+        @if (_summary != null)
+        {
+            <div class="card">
+                <h5 class="card-header">Total Recovered (Global)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_summary.Global.TotalRecovered</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+
+    <div class="col-sm-4">
+        @if (_summary != null)
+        {
+            <div class="card">
+                <h5 class="card-header">Total Deaths (Global)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_summary.Global.TotalDeaths</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <p>Data Covid in Indonesia. @DateTime.UtcNow.AddHours(7).ToString("yyyy-MM-dd HH:mm:ss") (Western Indonesia Time)</p>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        @if (_id != null)
+        {
+            <div class="card">
+                <h5 class="card-header">New Confirmed (ID)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_id.NewConfirmed</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+
+    <div class="col-sm-4">
+        @if (_id != null)
+        {
+            <div class="card">
+                <h5 class="card-header">New Recovered (ID)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_id.NewRecovered</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+
+    <div class="col-sm-4">
+        @if (_id != null)
+        {
+            <div class="card">
+                <h5 class="card-header">New Deaths (ID)</h5>
+                <div class="card-body">
+                    <p class="card-text">@_id.NewDeaths</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <p>Statistic in 7 Days before, (Start, yesterday)</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        @if (_byCountries != null && _byCountries.Count > 0)
+        {
+            <DxChart Data="@_byCountries.OrderByDescending(x => x.Date).Take(7).OrderBy(x => x.Date)">
+                <DxChartLineSeries Name="Recovered" ArgumentField="@((CovidApiByCountry s) => s.Date.ToString("yyyy-MM-dd"))" ValueField="@(s => s.Recovered)"></DxChartLineSeries>
+                <DxChartLineSeries Name="Confirmed" ArgumentField="@((CovidApiByCountry s) => s.Date.ToString("yyyy-MM-dd"))" ValueField="@(s => s.Confirmed)"></DxChartLineSeries>
+                <DxChartLineSeries Name="Deaths" ArgumentField="@((CovidApiByCountry s) => s.Date.ToString("yyyy-MM-dd"))" ValueField="@(s => s.Deaths)"></DxChartLineSeries>
+                <DxChartLegend Position="RelativePosition.Outside" HorizontalAlignment="HorizontalAlignment.Right" />
+            </DxChart>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+</div>
+
+@code {
+    private CovidSummary _summary;
+
+    private CovidCountry _id;
+
+    private List<CovidApiByCountry> _byCountries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _summary = await covidApi.GetSummary();
+
+        _id = _summary.Countries.Where(x => x.CountryCode == "ID").FirstOrDefault();
+
+        _byCountries = await covidApi.GetCovidApiByCountries();
+    }
+}
